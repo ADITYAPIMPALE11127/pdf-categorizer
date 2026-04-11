@@ -65,3 +65,42 @@ def get_pdf_stats(pdf_texts):
     }
     
     return stats
+
+def create_organized_zip(uploaded_zip_bytes, pdf_names, results):
+    """
+    Create organized ZIP file with categorized PDFs.
+    
+    Args:
+        uploaded_zip_bytes: Original ZIP bytes from st.file_uploader
+        pdf_names: List of PDF filenames
+        results: List of prediction dicts with 'document' and 'predicted_category'
+    
+    Returns:
+        BytesIO containing the organized ZIP file
+    """
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        # Extract original ZIP to get PDF bytes
+        with zipfile.ZipFile(io.BytesIO(uploaded_zip_bytes), 'r') as orig_zip:
+            for i, result in enumerate(results):
+                pdf_name = pdf_names[i]
+                category = result['predicted_category']
+                
+                try:
+                    # Read original PDF bytes
+                    pdf_bytes = orig_zip.read(pdf_name)
+                    
+                    # Create path: category_folder/pdf_name
+                    organized_path = f"{category}/{pdf_name}"
+                    
+                    # Add to ZIP
+                    zip_file.writestr(organized_path, pdf_bytes)
+                    
+                except KeyError:
+                    print(f"Warning: {pdf_name} not found in original ZIP")
+                except Exception as e:
+                    print(f"Error adding {pdf_name}: {e}")
+    
+    zip_buffer.seek(0)
+    return zip_buffer.getvalue()
+

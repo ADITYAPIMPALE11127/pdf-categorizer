@@ -14,6 +14,7 @@ from pdf_utils import (
       SVM_Classifier, 
       create_training_data,  # ADD THIS
     prepare_training_features, 
+    create_organized_zip,
 )
 
 # Page configuration
@@ -38,6 +39,10 @@ uploaded_zip = st.file_uploader(
 
 if uploaded_zip is not None:
     st.success("✅ ZIP file uploaded successfully!")
+    
+    # Store original ZIP bytes for later use
+    original_zip_bytes = uploaded_zip.read()
+    uploaded_zip.seek(0)  # Reset file pointer for extract_all_pdfs_from_zip
     
     # Create two main columns
     left_col, right_col = st.columns(2)
@@ -348,13 +353,14 @@ if uploaded_zip is not None:
                 for doc in documents:
                     st.write(f"📄 {doc}")
 
-        # Download button (simulated)
+        # Create real organized ZIP
+        organized_zip_bytes = create_organized_zip(original_zip_bytes, pdf_names, results)
+        
         st.download_button(
-            label="📥 Download Organized ZIP (Simulated)",
-            data="This would be the actual ZIP file in production",
-            file_name="organized_documents.zip",
+            label="📥 Download Organized ZIP ✅",
+            data=organized_zip_bytes,
+            file_name="organized_documents_by_category.zip",
             mime="application/zip",
-            help="In full implementation, this would create actual ZIP with categorized folders"
         )
 
         # Success celebration

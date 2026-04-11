@@ -86,6 +86,8 @@ class SVM_Classifier:
         """
         Predict category for a single document with detailed output
         """
+        if not self.is_trained:
+            raise ValueError("Classifier must be trained before prediction")
         prediction, probabilities = self.predict([features], return_probabilities=True)
         
         # Get confidence scores for all classes
